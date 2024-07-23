@@ -27,7 +27,7 @@ $site_name = get_bloginfo('name');
 ?>
 
 <div class="wrap exec">
-    <h1 id="exec-section-title"><?php echo esc_html($site_name);?> Office Tools</h1>
+    <h1 id="exec-section-title"><u><?php echo esc_html($site_name);?> Office Tools</u></h1>
     <div id="options-container">
         <p id="exec-section-subtext">Please select an option.</p>
         <a id="create-letter-button" href="#">Create New Letter</a><br>
@@ -47,6 +47,7 @@ $site_name = get_bloginfo('name');
         </div>
     </div>
     <div id="create-letter-container" style="display:none;">
+        <h2>Create new Letter</h2>
         <a id="back-to-options">< Back to Options</a>
         <form id="create-letter-form">
             <label for="letter-to">To:</label>

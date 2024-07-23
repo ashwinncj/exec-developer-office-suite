@@ -157,6 +157,39 @@ function exec_dev_office_suite_add_letter($request) {
 
     return new WP_REST_Response(array('message' => 'Letter added successfully'), 200);
 }
+// Register REST API endpoint for updating a letter
+function exec_dev_office_suite_register_update_letter_endpoint() {
+    register_rest_route('exec-dev-office-suite/v1', '/letters/(?P<id>\d+)', array(
+        'methods' => 'POST',
+        'callback' => 'exec_dev_office_suite_update_letter',
+        'permission_callback' => 'exec_dev_office_suite_admin_permission_callback'
+    ));
+}
 
+add_action('rest_api_init', 'exec_dev_office_suite_register_update_letter_endpoint');
 
+function exec_dev_office_suite_update_letter($request) {
+    global $wpdb;
+    $table_name = $wpdb->prefix . 'exec_data';
+    $id = intval($request['id']);
 
+    $date = current_time('mysql');
+    $subject = sanitize_text_field($request->get_param('subject'));
+    $content = wp_kses_post($request->get_param('content'));
+    $to_field = sanitize_text_field($request->get_param('to_field'));
+    $address = sanitize_textarea_field($request->get_param('address'));
+
+    $updated = $wpdb->update($table_name, array(
+        'date' => $date,
+        'subject' => $subject,
+        'content' => $content,
+        'to_field' => $to_field,
+        'address' => $address,
+    ), array('id' => $id));
+
+    if ($updated) {
+        return new WP_REST_Response(array('message' => 'Letter updated successfully'), 200);
+    } else {
+        return new WP_Error('update_failed', 'Failed to update letter', array('status' => 500));
+    }
+}
