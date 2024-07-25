@@ -50,6 +50,7 @@ $site_name = get_bloginfo('name');
         <h2>Create new Letter</h2>
         <a id="back-to-options">< Back to Options</a>
         <form id="create-letter-form">
+            <input type="text" id="letter-id" style="display:none">
             <label for="letter-to">To:</label>
             <input type="text" id="letter-to" name="to_field" required>
             <br>
@@ -62,7 +63,7 @@ $site_name = get_bloginfo('name');
             <label for="letter-content">Content:</label>
             <textarea id="letter-content" name="content" required></textarea>
             <br>
-            <button type="submit">Generate</button>
+            <button type="submit">Save</button>
         </form>
     </div>
     <div id="letters-container" style="display:none;">

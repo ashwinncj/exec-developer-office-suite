@@ -95,7 +95,7 @@
     font-size: 14px;
 }
 
-.view-letter {
+.view-letter, .edit-letter, .export-letter {
     color: #003E9B !important;
     text-decoration: underline !important;
     font-size: 14px !important;

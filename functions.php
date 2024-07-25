@@ -180,7 +180,6 @@ function exec_dev_office_suite_update_letter($request) {
     $address = sanitize_textarea_field($request->get_param('address'));
 
     $updated = $wpdb->update($table_name, array(
-        'date' => $date,
         'subject' => $subject,
         'content' => $content,
         'to_field' => $to_field,
@@ -193,3 +192,49 @@ function exec_dev_office_suite_update_letter($request) {
         return new WP_Error('update_failed', 'Failed to update letter', array('status' => 500));
     }
 }
+
+// Register REST API endpoint for exporting a letter as PDF
+function exec_dev_office_suite_register_export_letter_endpoint() {
+    register_rest_route('exec-dev-office-suite/v1', '/export-letter/(?P<id>\d+)', array(
+        'methods' => 'GET',
+        'callback' => 'exec_dev_office_suite_export_letter',
+        'permission_callback' => 'exec_dev_office_suite_admin_permission_callback'
+    ));
+}
+add_action('rest_api_init', 'exec_dev_office_suite_register_export_letter_endpoint');
+
+function exec_dev_office_suite_export_letter($request) {
+    global $wpdb;
+    $table_name = $wpdb->prefix . 'exec_data';
+    $id = intval($request['id']);
+
+    // Fetch the letter details by ID
+    $letter = $wpdb->get_row($wpdb->prepare(
+        "SELECT * FROM $table_name WHERE id = %d",
+        $id
+    ));
+
+    if (!$letter) {
+        return new WP_Error('no_letter', 'Letter not found', array('status' => 404));
+    }
+
+    // Manually include TCPDF library files
+    require_once plugin_dir_path(__FILE__) . 'tcpdf/tcpdf.php';
+
+    // Create new PDF document
+    $pdf = new TCPDF();
+    $pdf->AddPage();
+    $pdf->SetFont('helvetica', '', 12);
+    $pdf->Write(0, "Date: " . $letter->date, '', 0, 'L', true, 0, false, false, 0);
+    $pdf->Write(0, "To: " . $letter->to_field, '', 0, 'L', true, 0, false, false, 0);
+    $pdf->Write(0, "Address: " . $letter->address, '', 0, 'L', true, 0, false, false, 0);
+    $pdf->Write(0, "Subject: " . $letter->subject, '', 0, 'L', true, 0, false, false, 0);
+    $pdf->Write(0, "Content: " . $letter->content, '', 0, 'L', true, 0, false, false, 0);
+
+    // Output PDF as a string
+    $pdf_output = $pdf->Output('letter.pdf', 'S');
+
+    // Return the PDF as base64 encoded string
+    return new WP_REST_Response(array('pdf' => base64_encode($pdf_output)), 200);
+}
+

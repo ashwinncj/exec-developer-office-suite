@@ -1,18 +1,17 @@
 jQuery(document).ready(function ($) {
     const apiUrl = execDevOfficeSuite.apiUrl;
     const addLetterApiUrl = apiUrl.replace('letters', 'add-letter');
-    const searchApiUrl = apiUrl.replace('letters', 'search-letters');
     const nonce = execDevOfficeSuite.nonce;
     let currentPage = 1;
     const perPage = 10;
 
     function showOptions() {
         $('#options-container').show();
-        $('#letters-container, #pagination-container, #search-container, #create-letter-container, #back-button-container').hide();
+        $('#letters-container, #pagination-container, #search-container, #create-letter-container, #letter-dialog, #back-button-container').hide();
     }
 
     function showLetters() {
-        $('#options-container, #create-letter-container').hide();
+        $('#options-container, #create-letter-container, #letter-dialog').hide();
         $('#letters-container, #pagination-container, #search-container, #back-button-container').show();
     }
 
@@ -43,7 +42,7 @@ jQuery(document).ready(function ($) {
     function searchLetters(query) {
         console.log('Searching letters, query:', query); // Debugging output
         $.ajax({
-            url: searchApiUrl,
+            url: apiUrl.replace('letters', 'search-letters'),
             method: 'GET',
             data: {
                 search: query,
@@ -62,16 +61,22 @@ jQuery(document).ready(function ($) {
         });
     }
 
-    function addLetter(event) {
+    function addOrUpdateLetter(event) {
         event.preventDefault();
+        const letterId = $('#letter-id').val();
         const subject = $('#letter-subject').val();
         const content = $('#letter-content').val();
         const toField = $('#letter-to').val();
         const address = $('#letter-address').val();
 
+        const url = letterId ? `${apiUrl}/${letterId}` : addLetterApiUrl;
+        const method = letterId ? 'POST' : 'POST'; // Update method should also be POST
+        
+        $('#letter-id').val(); // Set this back to blank.
+
         $.ajax({
-            url: addLetterApiUrl,
-            method: 'POST',
+            url: url,
+            method: method,
             data: {
                 subject: subject,
                 content: content,
@@ -82,37 +87,24 @@ jQuery(document).ready(function ($) {
                 xhr.setRequestHeader('X-WP-Nonce', nonce);
             },
             success: function (response) {
-                console.log('Letter added:', response); // Debugging output
-                alert('Letter added successfully');
+                console.log('Letter added/updated:', response); // Debugging output
+                alert('Letter ' + (letterId ? 'updated' : 'added') + ' successfully');
                 fetchLetters(currentPage);
                 showLetters();
+                $('#create-letter-form')[0].reset();
+                $('#letter-id').val('');
+                $('#submit-letter-button').text('Submit');
             },
             error: function (error) {
-                console.error('Error adding letter:', error);
+                console.error('Error adding/updating letter:', error);
             }
-        });
-    }
-
-    function displayLettersInBox(letters) {
-        const lettersContainer = $('#letters-container');
-        lettersContainer.empty();
-        letters.forEach(letter => {
-            const letterItem = `
-                <div class="letter-item" data-id="${letter.id}">
-                    <p>${letter.date}</p>
-                    <p>${letter.to_field}</p>
-                    <p><strong>Sub: ${letter.subject}</strong></p>
-                    <a class="view-letter" data-id="${letter.id}">More</a>
-                </div>
-            `;
-            lettersContainer.append(letterItem);
         });
     }
 
     function displayLetters(letters) {
         const lettersContainer = $('#letters-container');
         lettersContainer.empty();
-    
+
         // Create the table and table headers
         const table = `
             <table class="letters-table">
@@ -130,16 +122,17 @@ jQuery(document).ready(function ($) {
                             <td>${letter.date}</td>
                             <td>${letter.to_field}</td>
                             <td><strong>${letter.subject}</strong></td>
-                            <td><a class="view-letter" data-id="${letter.id}">More</a></td>
+                            <td>
+                                <a class="view-letter" data-id="${letter.id}">More</a>
+                            </td>
                         </tr>
                     `).join('')}
                 </tbody>
             </table>
         `;
-    
+
         lettersContainer.append(table);
     }
-    
 
     function displayLetterDetails(letter) {
         const dialog = $('#letter-dialog');
@@ -150,10 +143,12 @@ jQuery(document).ready(function ($) {
             <p><strong><u>Subject:</u></strong> ${letter.subject}</p>
             <p><strong><u>Content:</u></strong></p>
             <p>${letter.content}</p>
+            <p class="edit-letter" id="edit-letter" data-id="${letter.id}">Edit</p>
+            <p class="export-letter" id="export-letter" data-id="${letter.id}">Export PDF</p>
         `);
+        $('#letters-container, #pagination-container').hide();
         dialog.show();
     }
-    
 
     function setupPagination(totalPages, currentPage) {
         const paginationContainer = $('#pagination-container');
@@ -168,7 +163,7 @@ jQuery(document).ready(function ($) {
 
     function fetchLetterDetails(id) {
         console.log('Fetching letter details, id:', id); // Debugging output
-        $.ajax({
+        return $.ajax({
             url: `${apiUrl}/${id}`,
             method: 'GET',
             beforeSend: function (xhr) {
@@ -176,12 +171,26 @@ jQuery(document).ready(function ($) {
             },
             success: function (data) {
                 console.log('Fetched letter details:', data); // Debugging output
-                displayLetterDetails(data);
+                return data;
             },
             error: function (error) {
                 console.error('Error fetching letter details:', error);
+                return null;
             }
         });
+    }
+
+    function populateEditForm(letter) {
+        $('#letter-id').val(letter.id);
+        $('#letter-subject').val(letter.subject);
+        $('#letter-content').val(letter.content);
+        $('#letter-to').val(letter.to_field);
+        // Assuming you have initialized TinyMCE on the textarea with id 'letter-content'
+        tinymce.get('letter-content').setContent(letter.address);
+        $('#letter-address').val(letter.address);
+        $('#submit-letter-button').text('Update');
+        $('#create-letter-container').show();
+        $('#letter-dialog').hide();
     }
 
     // Event Listeners
@@ -193,11 +202,23 @@ jQuery(document).ready(function ($) {
 
     $(document).on('click', '.view-letter', function () {
         const id = $(this).data('id');
-        fetchLetterDetails(id);
+        fetchLetterDetails(id)
+            .then(function (data) {
+                displayLetterDetails(data);
+            });
+    });
+
+    $(document).on('click', '.edit-letter', function () {
+        const id = $(this).data('id');
+        fetchLetterDetails(id)
+            .then(function (data) {
+                populateEditForm(data);
+            });
     });
 
     $('#letter-dialog .close-dialog').on('click', function () {
         $('#letter-dialog').hide();
+        showLetters();
     });
 
     $('#view-letters-button').on('click', function () {
@@ -206,8 +227,13 @@ jQuery(document).ready(function ($) {
     });
 
     $('#create-letter-button').on('click', function () {
-        $('#options-container').hide();
+        $('#options-container, #create-letter-container, #letter-dialog').hide();
         $('#create-letter-container').show();
+        $('#letter-id').val('');
+        // Clear the other fields of form.
+        $('#create-letter-form')[0].reset();
+        $('#submit-letter-button').text('Submit');
+        $('#letters-container, #pagination-container').hide();
     });
 
     $('#back-to-options').on('click', function () {
@@ -223,8 +249,44 @@ jQuery(document).ready(function ($) {
         searchLetters(query);
     });
 
-    $('#create-letter-form').on('submit', addLetter);
+    $('#create-letter-form').on('submit', addOrUpdateLetter);
 
+    $('#cancel-edit').on('click', function () {
+        showLetters();
+        $('#create-letter-form')[0].reset();
+        $('#letter-id').val('');
+        $('#submit-letter-button').text('Submit');
+    });
+
+    $(document).on('click', '#export-letter', function () {
+        const id = $(this).data('id');
+        exportLetter(id);
+    });
+    
+    function exportLetter(id) {
+        console.log('Exporting letter, id:', id); // Debugging output
+        $.ajax({
+            url: `${apiUrl.replace('letters', 'export-letter')}/${id}`,
+            method: 'GET',
+            beforeSend: function (xhr) {
+                xhr.setRequestHeader('X-WP-Nonce', nonce);
+            },
+            success: function (response) {
+                console.log('Exported letter PDF data:', response); // Debugging output
+                const pdfData = response.pdf;
+                const link = document.createElement('a');
+                link.href = 'data:application/pdf;base64,' + pdfData;
+                link.download = `letter-${id}.pdf`;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            },
+            error: function (error) {
+                console.error('Error exporting letter:', error);
+            }
+        });
+    }
+    
     // Initial Setup
     showOptions();
 });
