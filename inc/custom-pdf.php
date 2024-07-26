@@ -121,10 +121,14 @@ function exec_dev_office_suite_export_letter($request) {
     $pdf->setY($pdf->GetY() + 10);
     $html = '
         <p><b>To,</b></p>
-        <p><b>' . $letter->to_field . '</b></p>
-        <p>' . nl2br($letter->address) . '</p>';
-
+        <p><b>' . $letter->to_field . '</b></p>';
     $pdf->writeHTML($html, true, false, true, false, '');
+    
+    $pdf->setY($pdf->GetY() );
+    $html = '
+        <p>' . nl2br($letter->address) . '</p>';
+    $pdf->writeHTML($html, true, false, true, false, '');
+    
     $pdf->SetMargins(20, 30, 30);
     $pdf->setY($pdf->GetY() + 10);
     $html = '<p class="subject"><b><u>Subject:</u> ' . $letter->subject . '</b></p>
