@@ -3,7 +3,7 @@
 Plugin Name: Exec Developer Office Suite
 Plugin URI: https://execdeveloper.com/
 Description: A comprehensive office suite plugin for small business owners, including features like generating letterhead PDFs.
-Version: 1.0.0
+Version: 1.0.1
 Author: Ashwin
 Author URI: https://execdeveloper.com/
 License: GPL2
@@ -38,9 +38,11 @@ add_filter('template_include', 'exec_dev_office_suite_load_template');
 
 // Enqueue the necessary scripts and styles for the template
 function exec_dev_office_suite_enqueue_template_scripts() {
+    // $version = plugin version.
+    $version = '1.0.1';
     if (is_page_template('admin-only-template.php')) {
-        wp_enqueue_style('exec-dev-office-suite-style', plugin_dir_url(__FILE__) . 'css/admin-letters.css');
-        wp_enqueue_script('exec-dev-office-suite-admin-letters', plugin_dir_url(__FILE__) . 'js/admin-letters.js', array('jquery'), null, true);
+        wp_enqueue_style('exec-dev-office-suite-style', plugin_dir_url(__FILE__) . 'css/admin-letters.css', array(), $version);
+        wp_enqueue_script('exec-dev-office-suite-admin-letters', plugin_dir_url(__FILE__) . 'js/admin-letters.js', array('jquery'), $version, true);    
 
         // Localize the script with nonce
         wp_localize_script('exec-dev-office-suite-admin-letters', 'execDevOfficeSuite', array(

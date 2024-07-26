@@ -186,7 +186,7 @@ jQuery(document).ready(function ($) {
         $('#letter-content').val(letter.content);
         $('#letter-to').val(letter.to_field);
         // Assuming you have initialized TinyMCE on the textarea with id 'letter-content'
-        tinymce.get('letter-content').setContent(letter.address);
+        tinymce.get('letter-content').setContent(letter.content);
         $('#letter-address').val(letter.address);
         $('#submit-letter-button').text('Update');
         $('#create-letter-container').show();
