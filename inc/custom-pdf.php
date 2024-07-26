@@ -71,6 +71,12 @@ function exec_dev_office_suite_export_letter($request) {
     $phone = get_option('exec_dev_office_suite_phone');
     $email = get_option('exec_dev_office_suite_email');
     $logo = get_option('exec_dev_office_suite_logo');
+    // $reference_number = prefix from the settings and $letter id. YYYY/MM/ Min 3 digits. e.g. 002, 040,...
+    $reference_number = get_option('exec_dev_office_suite_reference_number_prefix');
+    $reference_number .= '/' . date('Y', strtotime($letter->date));
+    $reference_number .= '/' . date('m', strtotime($letter->date));
+    $reference_number .= '/' . str_pad($letter->id, 3, '0', STR_PAD_LEFT);
+
 
     // Create new PDF document
     $pdf = new CustomPDF();
@@ -84,7 +90,8 @@ function exec_dev_office_suite_export_letter($request) {
     // Create HTML content for the letter details
     $html = '
     <div class="letter-header">
-        <p><b>' . date('d M Y', strtotime($letter->date)) . '</b></p>';
+        <p><b>' . date('d M Y', strtotime($letter->date)) . '</b></p>
+        <p><b>Ref: ' . $reference_number . '</b></p>';
     $pdf->writeHTML($html, true, false, true, false, '');
     $pdf->setY($pdf->GetY() + 10);
     $html = '
