@@ -29,7 +29,15 @@ class CustomPDF extends TCPDF {
             }
         }
         $this->writeHTML($html, true, false, false, false, '');
-        $this->SetY($this->GetY() - 10);
+        // if only image yes then -10
+        // if image and companny name then -5
+        // if only company name then nothing
+        if ($this->logo && $this->company_name) {
+            $this->SetY($this->GetY() - 5);
+        } elseif ($this->logo) {
+            $this->SetY($this->GetY() - 10);
+        }
+        $this->SetY($this->GetY());
         $html = '<table border="0" cellpadding="3" cellspacing="0" width="100%">';        
         $html .= '<tr>
                     <td width="100%;margin:0" align="center">
