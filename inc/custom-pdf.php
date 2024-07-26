@@ -118,10 +118,10 @@ function exec_dev_office_suite_export_letter($request) {
         <p><b>' . date('d M Y', strtotime($letter->date)) . '</b></p>
         <p><b>Ref: ' . $reference_number . '</b></p>';
     $pdf->writeHTML($html, true, false, true, false, '');
-    $pdf->setY($pdf->GetY() + 10);
+    $pdf->setY($pdf->GetY() + 5);
     $html = '
-        <p><b>To,</b></p>
-        <p><b>' . $letter->to_field . '</b></p>';
+        <p><b>To,<br></b>
+        <b>' . $letter->to_field . '</b></p>';
     $pdf->writeHTML($html, true, false, true, false, '');
     
     $pdf->setY($pdf->GetY() );
@@ -130,7 +130,7 @@ function exec_dev_office_suite_export_letter($request) {
     $pdf->writeHTML($html, true, false, true, false, '');
     
     $pdf->SetMargins(20, 30, 30);
-    $pdf->setY($pdf->GetY() + 10);
+    $pdf->setY($pdf->GetY() + 5);
     $html = '<p class="subject"><b><u>Subject:</u> ' . $letter->subject . '</b></p>
     </div>';
     $pdf->writeHTML($html, true, false, true, false, '');
