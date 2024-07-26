@@ -19,20 +19,23 @@ class CustomPDF extends TCPDF {
 
     // Page header
     public function Header() {
+        // $separator = both email and phone should be present.
+        $separator = $this->email && $this->phone ? ' | ' : '';
+        $html = '';
         if ($this->logo) {
             $img_type = strtolower(pathinfo($this->logo, PATHINFO_EXTENSION));
             if (in_array($img_type, ['png', 'jpeg', 'jpg'])) {
-                $html = '<table width="100%;"><tr><td align="center"><img style="display:block;" src="' . $this->logo . '" height="50"></td></tr></table>';
+                $html .= '<table width="100%;"><tr><td align="center"><img style="display:block;" src="' . $this->logo . '" height="50"></td></tr></table>';
             }
         }
         $this->writeHTML($html, true, false, false, false, '');
-        $this->SetY($this->GetY() - 5);
+        $this->SetY($this->GetY() - 10);
         $html = '<table border="0" cellpadding="3" cellspacing="0" width="100%">';        
         $html .= '<tr>
                     <td width="100%;margin:0" align="center">
                       <span style="font-weight: bold; font-size: 20px;">' . $this->company_name . '</span><br>
                       <span style="font-size: 9px;">' . nl2br($this->company_address) . '</span><br>
-                      <span style="font-size: 9px;">' . $this->phone . ' | ' . $this->email . '</span>
+                      <span style="font-size: 9px;">' . $this->phone . $separator . $this->email . '</span>
                     </td>
                   </tr>
                 </table>';
@@ -71,12 +74,26 @@ function exec_dev_office_suite_export_letter($request) {
     $phone = get_option('exec_dev_office_suite_phone');
     $email = get_option('exec_dev_office_suite_email');
     $logo = get_option('exec_dev_office_suite_logo');
+    $display_logo = get_option('exec_dev_office_suite_display_logo');
+    $display_company_name = get_option('exec_dev_office_suite_display_company_name');
     // $reference_number = prefix from the settings and $letter id. YYYY/MM/ Min 3 digits. e.g. 002, 040,...
     $reference_number = get_option('exec_dev_office_suite_reference_number_prefix');
     $reference_number .= '/' . date('Y', strtotime($letter->date));
     $reference_number .= '/' . date('m', strtotime($letter->date));
     $reference_number .= '/' . str_pad($letter->id, 3, '0', STR_PAD_LEFT);
+    $offset = 45;
+    
+    // if not checked then hide the logo
+    if ( '1' !== $display_logo) {
+        $logo = false;
+        $offset = $offset - 15;
+    }
 
+    // if not checked then hide the company name
+    if ( '1' !== $display_company_name) {
+        $company_name = false;
+        $offset = $offset - 5;
+    }
 
     // Create new PDF document
     $pdf = new CustomPDF();
@@ -86,7 +103,7 @@ function exec_dev_office_suite_export_letter($request) {
     $pdf->SetFont('helvetica', '', 10);
     $pdf->SetMargins(15, 15, 15);
 
-    $pdf->setY(45);
+    $pdf->setY($offset);
     // Create HTML content for the letter details
     $html = '
     <div class="letter-header">
@@ -106,7 +123,7 @@ function exec_dev_office_suite_export_letter($request) {
     </div>';
     $pdf->writeHTML($html, true, false, true, false, '');
     $pdf->SetMargins(15, 0, 15);
-    $pdf->setY($pdf->GetY());
+    $pdf->setY($pdf->GetY() - 10);
     $html ='
     <div class="letter-content">' . $letter->content . '</div>';
 

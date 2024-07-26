@@ -142,6 +142,8 @@ function exec_dev_office_suite_register_settings() {
     register_setting('exec_dev_office_suite_settings_group', 'exec_dev_office_suite_email');
     register_setting('exec_dev_office_suite_settings_group', 'exec_dev_office_suite_logo');
     register_setting('exec_dev_office_suite_settings_group', 'exec_dev_office_suite_reference_number_prefix');
+    register_setting('exec_dev_office_suite_settings_group', 'exec_dev_office_suite_display_logo');
+    register_setting('exec_dev_office_suite_settings_group', 'exec_dev_office_suite_display_company_name');
 
     add_settings_section(
         'exec_dev_office_suite_settings_section',
@@ -194,6 +196,22 @@ function exec_dev_office_suite_register_settings() {
         'exec_dev_office_suite_reference_number_prefix',
         'Reference Number Prefix',
         'exec_dev_office_suite_reference_number_prefix_callback',
+        'exec-developer-office-suite-settings',
+        'exec_dev_office_suite_settings_section'
+    );
+
+    add_settings_field(
+        'exec_dev_office_suite_display_logo',
+        'Display Logo',
+        'exec_dev_office_suite_display_logo_callback',
+        'exec-developer-office-suite-settings',
+        'exec_dev_office_suite_settings_section'
+    );
+
+    add_settings_field(
+        'exec_dev_office_suite_display_company_name',
+        'Display Company Name',
+        'exec_dev_office_suite_display_company_name_callback',
         'exec-developer-office-suite-settings',
         'exec_dev_office_suite_settings_section'
     );
@@ -253,6 +271,18 @@ add_action('wp_enqueue_scripts', 'exec_dev_office_suite_enqueue_tinymce');
 function exec_dev_office_suite_reference_number_prefix_callback() {
     $reference_number_prefix = get_option('exec_dev_office_suite_reference_number_prefix');
     echo '<input type="text" name="exec_dev_office_suite_reference_number_prefix" value="' . esc_attr($reference_number_prefix) . '" class="regular-text">';
+}
+
+// Add display logo setting
+function exec_dev_office_suite_display_logo_callback() {
+    $display_logo = get_option('exec_dev_office_suite_display_logo');
+    echo '<input type="checkbox" name="exec_dev_office_suite_display_logo" value="1" ' . checked(1, $display_logo, false) . '>';
+}
+
+// Add display company name setting
+function exec_dev_office_suite_display_company_name_callback() {
+    $display_company_name = get_option('exec_dev_office_suite_display_company_name');
+    echo '<input type="checkbox" name="exec_dev_office_suite_display_company_name" value="1" ' . checked(1, $display_company_name, false) . '>';
 }
 
 
