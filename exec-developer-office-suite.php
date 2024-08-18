@@ -6,6 +6,7 @@ Description: A comprehensive office suite plugin for small business owners, incl
 Version: 1.0.4
 Author: Ashwin
 Author URI: https://execdeveloper.com/
+GitHub Plugin URI: https://github.com/ashwinncj/exec-developer-office-suite
 License: GPL2
 */
 
