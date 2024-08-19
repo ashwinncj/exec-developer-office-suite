@@ -105,6 +105,7 @@ function exec_dev_office_suite_export_letter($request) {
 
     // Create new PDF document
     $pdf = new CustomPDF();
+    $pdf->SetAutoPageBreak(TRUE, 20);
     $pdf->SetHeaderMargin(5);
     $pdf->setCompanyDetails($company_name, $company_address, $phone, $email, $logo);
     $pdf->AddPage();
@@ -134,7 +135,8 @@ function exec_dev_office_suite_export_letter($request) {
     $html = '<p class="subject"><b><u>Subject:</u> ' . $letter->subject . '</b></p>
     </div>';
     $pdf->writeHTML($html, true, false, true, false, '');
-    $pdf->SetMargins(15, 0, 15);
+    $pdf->SetMargins(15, $offset, 15);
+
     $pdf->setY($pdf->GetY() - 10);
     $html ='
     <div class="letter-content">' . $letter->content . '</div>';
