@@ -168,7 +168,7 @@ function exec_dev_office_suite_logo_callback() {
 // Enqueue admin scripts for media uploader
 function exec_dev_office_suite_admin_scripts() {
     wp_enqueue_media();
-    wp_enqueue_script('exec_dev_office_suite_admin_script', plugin_dir_url(__DIR__) . 'js/admin-script.js', array('jquery'), null, true);
+    wp_enqueue_script('exec_dev_office_suite_admin_script', plugin_dir_url(__DIR__) . 'js/admin-script.js', array('jquery'), '1.0.6', true);
     wp_enqueue_style('exec_dev_office_suite_admin_style', plugin_dir_url(__DIR__) . 'css/admin-style.css');
 }
 add_action('admin_enqueue_scripts', 'exec_dev_office_suite_admin_scripts');

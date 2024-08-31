@@ -3,7 +3,7 @@
 Plugin Name: Exec Developer Office Suite
 Plugin URI: https://execdeveloper.com/
 Description: A comprehensive office suite plugin for small business owners, including features like generating letterhead PDFs.
-Version: 1.0.5
+Version: 1.0.6
 Author: Ashwin
 Author URI: https://execdeveloper.com/
 GitHub Plugin URI: https://github.com/ashwinncj/exec-developer-office-suite
